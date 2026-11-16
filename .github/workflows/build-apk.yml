@@ -10,17 +10,17 @@ jobs:
       - name: Unzip project
         run: |
           ls -la
-          python3 -c "import zipfile, glob; z=glob.glob('*.zip')[0]; print(z); zipfile.ZipFile(z).extractall('extracted')"
+          python3 -c "import zipfile, glob; z=glob.glob('*.zip')[0]; print('Unzipping', z); zipfile.ZipFile(z).extractall('extracted')"
           ls -la extracted
-          python3 -c "import os, shutil, glob; folders=glob.glob('extracted/*'); print(folders); src=folders[0] if len(folders)==1 and os.path.isdir(folders[0]) else 'extracted'; print('src=',src); [shutil.move(os.path.join(src,f), f) for f in os.listdir(src)]"
+          python3 -c "import os, shutil, glob; folders=glob.glob('extracted/*'); print(folders); src=folders[0]; [shutil.move(os.path.join(src,f), f) for f in os.listdir(src)]; shutil.rmtree('extracted')"
           ls -la
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '22'
       - uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: 'temurin'
+          java-version: '21'
       - name: Build APK
         run: |
           npm install || true
