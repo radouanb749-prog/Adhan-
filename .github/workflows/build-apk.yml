@@ -10,9 +10,15 @@ jobs:
       - name: Unzip project
         run: |
           ls -la
-          python3 -c "import zipfile, glob; z=glob.glob('*.zip')[0]; print('Unzipping', z); zipfile.ZipFile(z).extractall('extracted')"
+          ZIP=$(ls *.zip | head -n 1)
+          echo "ZIP=$ZIP"
+          rm -rf extracted
+          mkdir -p extracted
+          unzip -q "$ZIP" -d extracted
           ls -la extracted
-          python3 -c "import os, shutil, glob; folders=glob.glob('extracted/*'); print(folders); src=folders[0]; [shutil.move(os.path.join(src,f), f) for f in os.listdir(src)]; shutil.rmtree('extracted')"
+          PROJ=$(dirname $(find extracted -name "package.json" | head -n 1))
+          echo "PROJ=$PROJ"
+          cp -a "$PROJ"/. .
           ls -la
       - uses: actions/setup-node@v4
         with:
