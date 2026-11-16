@@ -1,0 +1,35 @@
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip project
+        run: |
+          ls -la
+          python3 -c "import zipfile, glob; z=glob.glob('*.zip')[0]; print(z); zipfile.ZipFile(z).extractall('extracted')"
+          ls -la extracted
+          python3 -c "import os, shutil, glob; folders=glob.glob('extracted/*'); print(folders); src=folders[0] if len(folders)==1 and os.path.isdir(folders[0]) else 'extracted'; print('src=',src); [shutil.move(os.path.join(src,f), f) for f in os.listdir(src)]"
+          ls -la
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build APK
+        run: |
+          npm install || true
+          npx cap add android || true
+          npx cap sync android || true
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: salatmaroc-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
